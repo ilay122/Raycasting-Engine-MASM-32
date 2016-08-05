@@ -1,0 +1,3 @@
+#include "resource.h"
+
+IDB_lamp	BITMAP	"lamp.bmp"
