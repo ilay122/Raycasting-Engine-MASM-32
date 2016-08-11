@@ -47,7 +47,7 @@ includelib \masm32\lib\Ws2_32.lib
 .data
 	xPos DWORD 0
 	ClassName       DB      "TheClass",0
-	windowTitle     DB      "fuck you windows",0
+	windowTitle     DB      "ayy lmao",0
 	
 	linewidth DWORD 2
 	TWOPI real4 6.283185307179586f
@@ -56,6 +56,7 @@ includelib \masm32\lib\Ws2_32.lib
  	viewdist real4 692.820323027551
  	magicnum real4 0.001308996938995747 ; fov / 800 foreach x
  	globalfloatvar real4 ?
+        globalfloatvar2 real4 ?
         efes75 real4 0.75
         efes25 real4 0.25
         sngMinusOneHalf REAL4 -0.5
@@ -80,13 +81,13 @@ includelib \masm32\lib\Ws2_32.lib
      MAP DWORD  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 DWORD           1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
 DWORD	        1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
-DWORD	        1,0,0,1,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1
-DWORD	        1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
-DWORD	        1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
-DWORD	        1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1
-DWORD	        1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
-DWORD	        1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
-DWORD	        1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+DWORD	        1,0,0,1,0,1,0,0,1,1,1,1,1,2,3,4,5,6,7,8,1,1,1,0,0,0,0,0,0,0,0,1
+DWORD	        1,0,0,1,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+DWORD	        1,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+DWORD	        1,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1
+DWORD	        1,0,0,1,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+DWORD	        1,0,0,1,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+DWORD	        1,0,0,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
 DWORD	        1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1
 DWORD	        1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
 DWORD          	1,0,0,0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
@@ -141,6 +142,7 @@ DWORD	        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
     spritestodrawlen DWORD 0
     spritetodrawlen DWORD 9
     lamp HBITMAP ?
+    wolftextures HBITMAP ?
     lampstr DB "C:/FFOutput/lamp.bmp",0
        
 .code
@@ -487,15 +489,26 @@ castRay PROC, rayangle:real4 , screenpos:DWORD , hdc:HDC , localbrush:HBRUSH
         
         local todraw:DWORD
         
+        local typeofwall:DWORD
+        local floatingpoint:real4
+        
+        local finaltexturex:DWORD
+        
+        local screenypos:DWORD
+        
+        local xHit:DWORD
+        local yHit:DWORD
+        
         mov right,0
         mov up,0
         mov horizontal,0
         mov todraw,1
         mov eax,spritestodrawlen
         mov posinspritearr,eax
+        mov typeofwall,0
         
-        
-        
+        mov xHit,0
+        mov yHit,0
         
         
         
@@ -695,13 +708,14 @@ castRay PROC, rayangle:real4 , screenpos:DWORD , hdc:HDC , localbrush:HBRUSH
         popa
         
         mov edx,MAP[ecx]
+        mov typeofwall,edx
         cmp edx,0
         
         jne ayylmao1
         jmp after
         
         ayylmao1:
-        
+        ;mov typeofwall,edx
         movss xmm0,x
         movss xmm1,y
         subss xmm0,Player.x
@@ -714,6 +728,46 @@ castRay PROC, rayangle:real4 , screenpos:DWORD , hdc:HDC , localbrush:HBRUSH
         
         movss dist,xmm0 ; dist squared
         mov distchanged,1
+        
+        
+        movss xmm0,y
+	movss globalfloatvar,xmm0
+
+	movss xmm1,FP4(1.0f)
+	movss globalfloatvar2,xmm1
+
+	invoke MODULUS ,globalfloatvar,globalfloatvar2
+        
+        
+        
+        movss floatingpoint,xmm0
+        
+        mov ebx,right
+        cmp ebx,1
+        je afterrightchecktexture
+        
+        movss xmm1,FP4(1.0f)
+        movss xmm0,floatingpoint
+        subss xmm1,xmm0
+        movss floatingpoint,xmm1
+        
+        afterrightchecktexture:
+        mov eax,wallX
+        mov ebx,wallY
+        ;eax = round x
+        ;ebx = round y
+        mov ecx,ebx
+        imul ecx,mapWidth
+        add ecx,eax
+        imul ecx,type DWORD
+        mov edx ,MAP[ecx]
+        mov typeofwall,edx
+        
+        mov eax,wallX
+        mov xHit,eax
+        mov eax,wallY
+        mov yHit,eax
+        
         jmp endloopidiloop1
         
         after:
@@ -842,6 +896,7 @@ castRay PROC, rayangle:real4 , screenpos:DWORD , hdc:HDC , localbrush:HBRUSH
         popa
         
         mov edx,MAP[ecx]
+        
         cmp edx,0
         
         jne ayylmao2
@@ -874,7 +929,8 @@ castRay PROC, rayangle:real4 , screenpos:DWORD , hdc:HDC , localbrush:HBRUSH
         
         movss dist,xmm3
         mov distchanged,1
-        jmp endloopidiloop2
+        
+        jmp dootherstuffthatareneeded
         othercheck:
         movss xmm0,xmm3
         movss xmm1,dist
@@ -883,6 +939,44 @@ castRay PROC, rayangle:real4 , screenpos:DWORD , hdc:HDC , localbrush:HBRUSH
         jae endloopidiloop2
         movss dist,xmm0
         mov distchanged,1
+        dootherstuffthatareneeded:
+        mov typeofwall,edx
+        movss xmm0,x
+	movss globalfloatvar,xmm0
+    
+	movss xmm1,FP4(1.0f)
+	movss globalfloatvar2,xmm1
+
+	invoke MODULUS ,globalfloatvar,globalfloatvar2
+        movss floatingpoint,xmm0
+        
+        mov ebx,up
+        cmp ebx,0
+        je afterupchecktexture
+        
+        movss xmm1,FP4(1.0f)
+        ;movss xmm0,floatingpoint
+        subss xmm1,floatingpoint
+        movss floatingpoint,xmm1
+        
+        afterupchecktexture:
+        mov eax,wallX
+        mov ebx,wallY
+        ;eax = round x
+        ;ebx = round y
+        mov ecx,ebx
+        imul ecx,mapWidth
+        add ecx,eax
+        imul ecx,type DWORD
+        mov edx ,MAP[ecx]
+        mov typeofwall,edx
+        
+        mov eax,wallX
+        mov xHit,eax
+        mov eax,wallY
+        mov yHit,eax
+        
+        
         jmp endloopidiloop2
         after2:
         movss xmm0,dXHor
@@ -954,12 +1048,43 @@ castRay PROC, rayangle:real4 , screenpos:DWORD , hdc:HDC , localbrush:HBRUSH
         xor edx,edx
         idiv ebx
         
+        
+        
         mov ebx,WINDOW_HEIGHT / 2
         sub ebx,eax
         mov eax,height
         
+        mov screenypos,ebx
         
-        invoke BUILDRECT,screenpos,ebx,linewidth,eax,hdc,localbrush
+        mov eax,xHit
+        mov ebx,yHit
+        ;eax = round x
+        ;ebx = round y
+        mov ecx,ebx
+        imul ecx,mapWidth
+        add ecx,eax
+        imul ecx,type DWORD
+        mov edx ,MAP[ecx]
+        mov typeofwall,edx
+        dec typeofwall
+        
+        movss xmm0,floatingpoint
+        mulss xmm0,FP4(63.0f) ; WIDTH - 1
+        
+        mov eax,typeofwall
+        cvtsi2ss xmm1,eax
+        mulss xmm1,FP4(64.0f)
+        
+        addss xmm0,xmm1
+        
+        movss tempvarr,xmm0
+        invoke FLOOR,tempvarr
+        cvtss2si eax, xmm0
+        mov finaltexturex,eax
+        
+        ;invoke BUILDRECT,screenpos,screenypos,linewidth,height,hdc,localbrush
+        
+        invoke DrawImage,hdc,wolftextures,screenpos,screenypos,finaltexturex,0,linewidth,64,linewidth,height
         
         endthis:
         ;invoke BUILDRECT,screenpos,300,1,1,hdc,localbrush
@@ -1299,6 +1424,10 @@ main PROC
         invoke GetModuleHandle,NULL
 	invoke LoadBitmap,eax,1222
 	mov lamp,eax
+
+        invoke GetModuleHandle,NULL
+	invoke LoadBitmap,eax,1223
+	mov wolftextures,eax 
         
         ;mov spritestodraw[place * SizeOf SPRITE].x,1
         

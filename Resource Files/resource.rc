@@ -1,3 +1,5 @@
 #include "resource.h"
 
-IDB_lamp	BITMAP	"lamp.bmp"
+
+IDB_lamp BITMAP "lamp.bmp"
+IDB_textures BITMAP "wolftextures.bmp"
