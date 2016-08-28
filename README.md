@@ -6,5 +6,5 @@ TODO:
 - [x] Add wall textures
 
 
-- [ ] Fix bugged sprites behind walls
+- [x] Fix bugged sprites behind walls
 

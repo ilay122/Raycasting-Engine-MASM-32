@@ -139,6 +139,7 @@ DWORD	        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
     SPRITE ENDS
     
     spritestodraw    SPRITE   1000 dup (<0,0>)
+    heightsarr DWORD 800 dup(0)
     spritestodrawlen DWORD 0
     spritetodrawlen DWORD 9
     lamp HBITMAP ?
@@ -295,6 +296,12 @@ DRAWSPRITES PROC , hdc:HDC
     local sizeofspr:real4
     local sizeofsprfloor:DWORD
     
+    local finalxonscreen:DWORD
+    local finalimgwidth:DWORD
+    local finalwidthsize:DWORD
+    local finalxposontexture:DWORD
+    local mathmaxx:DWORD
+    
     mov eax,spritetodrawlen
     mov ecx,0
     
@@ -314,6 +321,9 @@ DRAWSPRITES PROC , hdc:HDC
     mov ebx,spritey
     cvtsi2ss xmm1,ebx
     subss xmm1,Player.y
+    
+    addss xmm0,FP4(0.5f)
+    addss xmm1,FP4(0.5f)
     
     movss dxx,xmm0
     movss dyy,xmm1
@@ -385,8 +395,96 @@ DRAWSPRITES PROC , hdc:HDC
     cvtss2si eax, xmm0
     mov spryscreen,eax
     
-    invoke DrawImage,hdc,lamp,sprxscreen,spryscreen,0,0,64,64,sizeofsprfloor,sizeofsprfloor
     
+    movss xmm0,sprxonscreen
+    comiss xmm0,FP4(0.0f)
+    jb xlowerthan0
+    mov eax,sprxscreen
+    mov mathmaxx,eax
+    jmp aftermathmaxcheck
+    xlowerthan0:
+    mov mathmaxx,0
+    aftermathmaxcheck:
+    
+    mov ecx,mathmaxx
+    imul ecx,TYPE DWORD
+    mov eax,heightsarr[ecx]
+    cmp eax,sizeofsprfloor
+    jg morestufftocheck
+    jmp lesssufftocheck
+    
+    morestufftocheck:
+    mov ecx,0
+    loopofmorstufftocheck:
+    cmp ecx,64
+    je justbeforedrawsprite
+    
+    mov ebx,ecx
+    add ebx,mathmaxx
+    imul ebx,TYPE DWORD
+    mov eax,heightsarr[ebx]
+    cmp eax,sizeofsprfloor
+    jge endofloopmorestufftocheck
+    
+    mov ebx,sprxscreen
+    add ebx,ecx
+    mov finalxonscreen,ebx
+    mov finalxposontexture,ecx
+    mov ebx,sizeofsprfloor
+    mov finalwidthsize,ebx
+    mov finalimgwidth,64
+    jmp justbeforedrawsprite
+    
+    endofloopmorestufftocheck:
+    inc ecx
+    jmp loopofmorstufftocheck
+    
+    
+    
+    jmp justbeforedrawsprite
+    lesssufftocheck:
+    mov ecx,0
+    lesssufftocheckloop:
+    cmp ecx,64
+    je lesssufftocheckendloop
+    mov ebx,ecx
+    add ebx,mathmaxx
+    imul ebx,TYPE DWORD
+    mov eax,heightsarr[ebx]
+    cmp eax,sizeofsprfloor
+    jg lesssufftocheckendloop
+    
+    inc ecx
+    jmp lesssufftocheckloop
+    
+    lesssufftocheckendloop:
+    cmp ecx,64
+    je everyfinisverynice
+    
+    jmp fuckthissprite
+    
+    
+    everyfinisverynice:
+    mov finalimgwidth,64
+    mov ebx,sizeofsprfloor
+    mov finalwidthsize,ebx
+    mov ebx,sprxscreen
+    mov finalxonscreen,ebx
+    mov finalxposontexture,0
+    jmp justbeforedrawsprite
+    
+    
+    fuckthissprite:
+    mov finalimgwidth,ecx
+    mov finalwidthsize,ecx
+    mov ebx,sprxscreen
+    mov finalxonscreen,ebx
+    mov finalxposontexture,0
+    
+    
+    justbeforedrawsprite:
+    invoke DrawImage,hdc,lamp,finalxonscreen,spryscreen,finalxposontexture,0,finalimgwidth,64,finalwidthsize,sizeofsprfloor
+    afterdrawsprite:
     popa
     inc ecx
     jmp loopspritestobedrawndraw
@@ -1085,6 +1183,10 @@ castRay PROC, rayangle:real4 , screenpos:DWORD , hdc:HDC , localbrush:HBRUSH
         ;invoke BUILDRECT,screenpos,screenypos,linewidth,height,hdc,localbrush
         
         invoke DrawImage,hdc,wolftextures,screenpos,screenypos,finaltexturex,0,linewidth,64,linewidth,height
+        mov ecx,screenpos
+        imul ecx,TYPE DWORD
+        mov eax,height
+        mov heightsarr[ecx],eax
         
         endthis:
         ;invoke BUILDRECT,screenpos,300,1,1,hdc,localbrush
@@ -1348,8 +1450,10 @@ renderstate:
         invoke NewBrushColor  , 000FF00H,addr localbrush
 	mov localbrush,eax
         
-        mov ecx,800
+        mov ecx,0
         rayloop:
+        cmp ecx,800
+        je afterraycastingloop
             pusha ;; cvtsi2ss = convert register/integer to float and mov to xmm register
 				  ;; movss = mov value from memory to xmm register
 				;mov ecxbackup,ecx
@@ -1375,8 +1479,9 @@ renderstate:
         		invoke castRay,anglee,ecx,hdc,localbrush
                 popa
             popa
-        loop rayloop	
-
+        inc ecx
+        jmp rayloop	
+        afterraycastingloop:
         ;invoke DrawImage,hdc,lamp,0,0,0,0,64,64,64,64
         invoke DRAWSPRITES,hdc
 	invoke EndPaint,hWnd,addr paint
