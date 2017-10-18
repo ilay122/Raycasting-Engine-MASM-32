@@ -70,14 +70,14 @@ includelib \masm32\lib\Ws2_32.lib
 		y     real4  10.0f
 		dir   DWORD  0.0f
 		rot  real4  0.0f
-		moveSpeed real4 0.15
+		moveSpeed real4 0.20
                 speed real4 0.0f
 		rotSpeed real4  0.06981317007977318f
                 moveDir real4 0.0f
 	PLAYER ENDS
 
-	
-     Player PLAYER <16.0f,10.0f,0,0.0f,0.05f,0.0f,0.05f,0.0f>
+	                                  ;mvspeed    rotspeed
+     Player PLAYER <16.0f,10.0f,0,0.0f,0.15f,0.0f,0.05f,0.0f>
      MAP DWORD  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 DWORD           1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
 DWORD	        1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
@@ -1218,9 +1218,9 @@ ProjectWndProc  PROC,   hWnd:HWND, message:UINT, wParam:WPARAM, lParam:LPARAM
         invoke timeGetTime
         mov currenttime,eax
         sub eax,lasttime
-        cvtsi2ss xmm0,ebx
+        cvtsi2ss xmm0,eax
         comiss xmm0,timebetweenframes ; 1000/60=16.6666666
-        jae endofupdatestate
+        jbe endofupdatestate
         mov eax,currenttime
         mov lasttime,eax
         
@@ -1412,7 +1412,7 @@ ProjectWndProc  PROC,   hWnd:HWND, message:UINT, wParam:WPARAM, lParam:LPARAM
         movss Player.x,xmm0
         notmove:
    
-        ;endofupdatestate:
+        endofupdatestate:
         
 	cmp     message,        WM_PAINT
 	je      renderstate
@@ -1420,7 +1420,7 @@ ProjectWndProc  PROC,   hWnd:HWND, message:UINT, wParam:WPARAM, lParam:LPARAM
 	je      closing
 	cmp message,    WM_TIMER
 	je      timing
-        endofupdatestate:
+        ;endofupdatestate:
 	jmp OtherInstances
 	ret
 
